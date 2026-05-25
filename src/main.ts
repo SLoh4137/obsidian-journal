@@ -1,4 +1,4 @@
-import {MarkdownView, Notice, Plugin, TFile} from 'obsidian';
+import {App, CachedMetadata, MarkdownView, Modal, Notice, Plugin, TFile} from 'obsidian';
 import {DEFAULT_SETTINGS, MyPluginSettings, SampleSettingTab} from "./settings";
 import {updateCoordinates} from "./frontmatter";
 
@@ -15,6 +15,7 @@ const IMMICH_PLUGIN_ID = 'obsidian-immich-sync';
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
+	private lastFirstImmichHash = new Map<string, string | undefined>();
 
 	async onload() {
 		await this.loadSettings();
@@ -57,7 +58,35 @@ export default class MyPlugin extends Plugin {
 			},
 		});
 
+		this.registerEvent(
+			this.app.metadataCache.on('changed', (file, _data, cache) => {
+				this.handleImmichImagesChange(file, cache);
+			}),
+		);
+
 		this.addSettingTab(new SampleSettingTab(this.app, this));
+	}
+
+	private firstImmichHash(cache: CachedMetadata | undefined): string | undefined {
+		const images: unknown = cache?.frontmatter?.[this.settings.immichImagesProperty];
+		if (!Array.isArray(images)) return undefined;
+		const first: unknown = (images as unknown[])[0];
+		return typeof first === 'string' ? first : undefined;
+	}
+
+	private handleImmichImagesChange(file: TFile, cache: CachedMetadata) {
+		const firstHash = this.firstImmichHash(cache);
+		const seen = this.lastFirstImmichHash.has(file.path);
+		const previous = this.lastFirstImmichHash.get(file.path);
+		this.lastFirstImmichHash.set(file.path, firstHash);
+
+		if (!seen) return;
+		if (previous === firstHash) return;
+		if (firstHash === undefined) return;
+
+		new ConfirmImmichCoordinatesModal(this.app, firstHash, () => {
+			void this.setCoordinatesFromImmich(file);
+		}).open();
 	}
 
 	async setCoordinatesFromImmich(file: TFile) {
@@ -95,5 +124,32 @@ export default class MyPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+}
+
+class ConfirmImmichCoordinatesModal extends Modal {
+	constructor(app: App, private hash: string, private onConfirm: () => void) {
+		super(app);
+	}
+
+	onOpen() {
+		const {contentEl} = this;
+		contentEl.createEl('h2', {text: 'Update coordinates from immich?'});
+		const preview = this.hash.length > 12 ? `${this.hash.slice(0, 12)}…` : this.hash;
+		contentEl.createEl('p', {
+			text: `Image ${preview} was just added. Update this note's coordinates from it?`,
+		});
+		const buttons = contentEl.createDiv({cls: 'modal-button-container'});
+		const cancel = buttons.createEl('button', {text: 'Cancel'});
+		cancel.addEventListener('click', () => this.close());
+		const confirm = buttons.createEl('button', {text: 'Update', cls: 'mod-cta'});
+		confirm.addEventListener('click', () => {
+			this.onConfirm();
+			this.close();
+		});
+	}
+
+	onClose() {
+		this.contentEl.empty();
 	}
 }
