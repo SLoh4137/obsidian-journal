@@ -70,6 +70,93 @@
 }
 
 .journal-calendar-view {
+	padding: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	height: 100%;
+	overflow-y: auto;
+}
+
+.journal-calendar-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.journal-calendar-month-label {
+	flex: 1;
+	font-weight: 600;
+	font-size: 1.1em;
+	text-align: center;
+}
+
+.journal-calendar-nav {
+	min-width: 32px;
+	font-size: 1.2em;
+	line-height: 1;
+	padding: 4px 8px;
+}
+
+.journal-calendar-jump {
+	padding: 4px 10px;
+}
+
+.journal-calendar-grid {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 4px;
+}
+
+.journal-calendar-weekday {
+	font-size: 0.85em;
+	font-weight: 600;
+	color: var(--text-muted);
+	text-align: center;
+	padding: 4px 0;
+}
+
+.journal-calendar-day {
+	position: relative;
+	aspect-ratio: 1 / 1;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background-color: transparent;
+	background-size: cover;
+	background-position: center;
+	cursor: default;
+	overflow: hidden;
+}
+
+.journal-calendar-day.muted {
+	opacity: 0.35;
+}
+
+.journal-calendar-day.today {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: -2px;
+}
+
+.journal-calendar-day.has-entry {
+	cursor: pointer;
+	background-color: var(--interactive-accent);
+}
+
+.journal-calendar-day.has-entry.has-image {
+	background-color: var(--background-modifier-border);
+}
+
+.journal-calendar-day-num {
+	position: absolute;
+	top: 4px;
+	left: 6px;
+	font-size: 0.85em;
+	color: var(--text-normal);
+}
+
+.journal-calendar-day.has-entry .journal-calendar-day-num {
+	color: var(--text-on-accent);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
 }
 
 .journal-memories-view {
