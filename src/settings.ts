@@ -65,8 +65,7 @@ export class JournalSettingTab extends PluginSettingTab {
 				"Vault-relative folder containing journal entries. Listeners and journal commands only act on files in this folder. Leave empty to act on all files."
 			)
 			.addText((text) => {
-				text
-					.setPlaceholder("Journal")
+				text.setPlaceholder("Journal")
 					.setValue(this.plugin.settings.journalEntriesFolder)
 					.onChange(async (value) => {
 						this.plugin.settings.journalEntriesFolder = value;
