@@ -1,4 +1,9 @@
-import { BasesEntry, BasesView, QueryController } from "obsidian";
+import {
+	BasesEntry,
+	BasesView,
+	Component,
+	QueryController,
+} from "obsidian";
 import type JournalPlugin from "../main";
 import { getImmichApi } from "../immich";
 import {
@@ -20,6 +25,7 @@ export class EntriesBasesView extends BasesView {
 	private observer: IntersectionObserver | null = null;
 	private sorted: BasesEntry[] = [];
 	private rendered = 0;
+	private markdownComponent: Component | null = null;
 
 	constructor(
 		controller: QueryController,
@@ -32,10 +38,15 @@ export class EntriesBasesView extends BasesView {
 	onunload() {
 		this.observer?.disconnect();
 		this.observer = null;
+		this.markdownComponent?.unload();
+		this.markdownComponent = null;
 		super.onunload();
 	}
 
 	onDataUpdated(): void {
+		this.markdownComponent?.unload();
+		this.markdownComponent = new Component();
+		this.markdownComponent.load();
 		const dateProp = this.plugin.settings.journalDateProperty;
 		const entries = this.data.data.slice();
 		entries.sort((a, b) => {
@@ -108,14 +119,15 @@ export class EntriesBasesView extends BasesView {
 		if (!hash) body.addClass("no-image");
 
 		const textEl = body.createDiv({ cls: "journal-entry-card-text" });
-		void renderEntryTextBlock(
-			this.app,
-			textEl,
-			entry.file,
-			journalPrefixProperty,
-			4,
-			this
-		);
+		if (this.markdownComponent) {
+			void renderEntryTextBlock(
+				this.app,
+				textEl,
+				entry.file,
+				journalPrefixProperty,
+				this.markdownComponent
+			);
+		}
 
 		if (hash) {
 			const thumb = body.createDiv({ cls: "journal-entry-card-thumb" });

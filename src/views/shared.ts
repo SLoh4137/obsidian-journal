@@ -71,15 +71,9 @@ export async function renderEntryTextBlock(
 	parent: HTMLElement,
 	file: TFile,
 	prefix: string,
-	maxLines: number,
 	component: Component
 ): Promise<HTMLElement> {
 	const block = parent.createDiv({ cls: "journal-text-block" });
-	block.style.setProperty("--journal-text-lines", String(maxLines));
-	block.style.setProperty(
-		"--journal-text-body-lines",
-		String(Math.max(1, maxLines - 1))
-	);
 
 	block.createDiv({
 		cls: "journal-text-block-title",
@@ -88,10 +82,16 @@ export async function renderEntryTextBlock(
 
 	const body = block.createDiv({ cls: "journal-text-block-body" });
 	const raw = await app.vault.cachedRead(file);
-	const stripped = stripFrontmatter(raw);
-	const truncated = stripped.split("\n").slice(0, 20).join("\n").trim();
-	if (truncated) {
-		await MarkdownRenderer.render(app, truncated, body, file.path, component);
+	const stripped = stripFrontmatter(raw).trim();
+	if (stripped) {
+		const truncated = stripped.split("\n").slice(0, 200).join("\n");
+		await MarkdownRenderer.render(
+			app,
+			truncated,
+			body,
+			file.path,
+			component
+		);
 	}
 	return block;
 }

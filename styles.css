@@ -5,6 +5,9 @@
 	flex-direction: column;
 	gap: 2px;
 	min-width: 0;
+	min-height: 0;
+	flex: 1 1 auto;
+	overflow: hidden;
 }
 
 .journal-text-block-title {
@@ -13,24 +16,33 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	flex: 0 0 auto;
 }
 
 .journal-text-block-body {
 	color: var(--text-muted);
 	font-size: 0.95em;
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	-webkit-line-clamp: var(--journal-text-body-lines, 3);
-	line-clamp: var(--journal-text-body-lines, 3);
+	line-height: 1.4;
 	overflow: hidden;
+	min-height: 0;
+	flex: 1 1 auto;
 }
 
-.journal-text-block-body > * {
+.journal-text-block-body > *,
+.journal-text-block-body p,
+.journal-text-block-body ul,
+.journal-text-block-body ol,
+.journal-text-block-body h1,
+.journal-text-block-body h2,
+.journal-text-block-body h3,
+.journal-text-block-body h4,
+.journal-text-block-body h5,
+.journal-text-block-body h6 {
 	margin: 0;
 }
 
 .journal-text-block-body > * + * {
-	margin-top: 2px;
+	margin-top: 4px;
 }
 
 .journal-entries-view {
@@ -79,12 +91,27 @@
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
+	margin-top: 4px;
 	gap: 4px;
 	color: var(--text-muted);
 }
 
+/* With a thumbnail, anchor the row height to the thumb's square aspect ratio:
+   make the text area a positioning context and float the text block over it
+   so its content height doesn't push the card taller. */
+.journal-entry-card-body:not(.no-image) .journal-entry-card-text {
+	position: relative;
+}
+
+.journal-entry-card-body:not(.no-image) .journal-entry-card-text > .journal-text-block {
+	position: absolute;
+	inset: 0;
+}
+
 .journal-entry-card-body.no-image .journal-entry-card-text {
 	flex: 1;
+	max-height: calc(1.2em * 5);
+	overflow: hidden;
 }
 
 .journal-entry-card-thumb {
@@ -246,11 +273,20 @@
 
 /* Memories full-screen modal */
 
+.modal-container:has(.modal.journal-memories-modal) .modal-bg {
+	opacity: 1;
+}
+
 .modal.journal-memories-modal {
-	width: min(95vw, 720px);
-	height: min(95vh, 960px);
+	width: 100vw;
+	max-width: 100vw;
+	height: 100vh;
+	max-height: 100vh;
+	top: 0;
+	left: 0;
+	border-radius: 0;
 	padding: 0;
-	background: var(--background-primary);
+	background: #000;
 }
 
 .journal-memories-modal .modal-close-button {
@@ -288,6 +324,14 @@
 	color: white;
 }
 
+.journal-memories-modal .journal-text-block-title {
+	color: white;
+}
+
+.journal-memories-modal .journal-text-block-body {
+	color: rgba(255, 255, 255, 0.85);
+}
+
 .journal-memories-label {
 	padding: 14px 18px;
 	font-weight: 600;
@@ -315,6 +359,7 @@
 
 .journal-memories-media.text-only {
 	padding: 24px;
+	align-items: stretch;
 }
 
 .journal-memories-text-slide {
@@ -322,7 +367,9 @@
 	flex-direction: column;
 	gap: 6px;
 	text-align: center;
-	max-width: 80%;
+	width: 80%;
+	margin: 0 auto;
+	overflow: hidden;
 }
 
 .journal-memories-open-panel {
@@ -332,6 +379,9 @@
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
+	max-height: 30vh;
+	overflow: hidden;
+	flex: 0 0 auto;
 }
 
 .journal-memories-open-panel:hover {
@@ -344,6 +394,12 @@
 	gap: 4px;
 	font-size: 0.95em;
 	opacity: 0.95;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.journal-memories-open-cta {
+	flex: 0 0 auto;
 }
 
 .journal-memories-open-cta {

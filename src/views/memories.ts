@@ -224,7 +224,6 @@ class MemoriesModal extends Modal {
 				text,
 				slide.period.entry.file,
 				prefix,
-				4,
 				this.slideComponent
 			);
 		}
@@ -245,7 +244,6 @@ class MemoriesModal extends Modal {
 			lines,
 			slide.period.entry.file,
 			prefix,
-			4,
 			this.slideComponent
 		);
 		openPanel.createDiv({
