@@ -5,7 +5,7 @@ import {
 	Setting,
 	TFolder,
 } from "obsidian";
-import MyPlugin from "./main";
+import JournalPlugin from "./main";
 
 class FolderSuggest extends AbstractInputSuggest<TFolder> {
 	constructor(
@@ -36,20 +36,20 @@ class FolderSuggest extends AbstractInputSuggest<TFolder> {
 	}
 }
 
-export interface MyPluginSettings {
+export interface JournalPluginSettings {
 	immichImagesProperty: string;
 	journalEntriesFolder: string;
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
+export const DEFAULT_SETTINGS: JournalPluginSettings = {
 	immichImagesProperty: "immichImages",
 	journalEntriesFolder: "",
 };
 
-export class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+export class JournalSettingTab extends PluginSettingTab {
+	plugin: JournalPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: JournalPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}

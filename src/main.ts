@@ -1,5 +1,5 @@
 import {App, CachedMetadata, MarkdownView, Modal, Notice, Plugin, TFile} from 'obsidian';
-import {DEFAULT_SETTINGS, MyPluginSettings, SampleSettingTab} from "./settings";
+import {DEFAULT_SETTINGS, JournalPluginSettings, JournalSettingTab} from "./settings";
 import {updateCoordinates} from "./frontmatter";
 
 interface LatLng {
@@ -13,8 +13,8 @@ interface ImmichPluginApi {
 
 const IMMICH_PLUGIN_ID = 'obsidian-immich-sync';
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class JournalPlugin extends Plugin {
+	settings: JournalPluginSettings;
 	private lastFirstImmichHash = new Map<string, string | undefined>();
 
 	async onload() {
@@ -64,7 +64,7 @@ export default class MyPlugin extends Plugin {
 			}),
 		);
 
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new JournalSettingTab(this.app, this));
 	}
 
 	private firstImmichHash(cache: CachedMetadata | undefined): string | undefined {
@@ -126,7 +126,7 @@ export default class MyPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<MyPluginSettings>);
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<JournalPluginSettings>);
 	}
 
 	async saveSettings() {
