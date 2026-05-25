@@ -1,0 +1,25 @@
+{
+  "name": "journey-migration-obsidian",
+  "version": "1.0.0",
+  "description": "Scripts used to migrate my old entries in Journey to Obsidian",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "convert": "tsx --env-file=.env src/journey-to-obsidian.ts"
+  },
+  "dependencies": {
+    "@immich/sdk": "^2.7.5",
+    "exifr": "^7.1.3",
+    "luxon": "^3.7.2",
+    "turndown": "^7.2.0",
+    "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.7.1",
+    "@types/node": "^20.11.0",
+    "@types/turndown": "^5.0.4",
+    "tsx": "^4.7.0"
+  }
+}
