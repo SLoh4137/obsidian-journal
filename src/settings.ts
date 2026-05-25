@@ -3,10 +3,12 @@ import MyPlugin from "./main";
 
 export interface MyPluginSettings {
 	immichImagesProperty: string;
+	journalEntriesFolder: string;
 }
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
-	immichImagesProperty: 'immichImages'
+	immichImagesProperty: 'immichImages',
+	journalEntriesFolder: ''
 }
 
 export class SampleSettingTab extends PluginSettingTab {
@@ -21,6 +23,17 @@ export class SampleSettingTab extends PluginSettingTab {
 		const {containerEl} = this;
 
 		containerEl.empty();
+
+		new Setting(containerEl)
+			.setName('Journal entries folder')
+			.setDesc('Vault-relative folder containing journal entries. Listeners and journal commands only act on files in this folder. Leave empty to act on all files.')
+			.addText(text => text
+				.setPlaceholder('Journal')
+				.setValue(this.plugin.settings.journalEntriesFolder)
+				.onChange(async (value) => {
+					this.plugin.settings.journalEntriesFolder = value;
+					await this.plugin.saveSettings();
+				}));
 
 		new Setting(containerEl)
 			.setName('Immich images property')

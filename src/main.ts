@@ -74,7 +74,14 @@ export default class MyPlugin extends Plugin {
 		return typeof first === 'string' ? first : undefined;
 	}
 
+	private isInJournalFolder(file: TFile): boolean {
+		const folder = this.settings.journalEntriesFolder.replace(/^\/+|\/+$/g, '');
+		if (folder === '') return true;
+		return file.path === folder || file.path.startsWith(`${folder}/`);
+	}
+
 	private handleImmichImagesChange(file: TFile, cache: CachedMetadata) {
+		if (!this.isInJournalFolder(file)) return;
 		const firstHash = this.firstImmichHash(cache);
 		const seen = this.lastFirstImmichHash.has(file.path);
 		const previous = this.lastFirstImmichHash.get(file.path);
