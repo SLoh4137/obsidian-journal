@@ -6,6 +6,7 @@ import {
 	Notice,
 	Plugin,
 	TFile,
+	moment,
 } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
@@ -81,6 +82,7 @@ export default class JournalPlugin extends Plugin {
 		this.registerEvent(
 			this.app.metadataCache.on("changed", (file, _data, cache) => {
 				this.handleImmichImagesChange(file, cache);
+				void this.handleJournalTimeChange(file, cache);
 			})
 		);
 
@@ -92,19 +94,19 @@ export default class JournalPlugin extends Plugin {
 	private registerJournalBasesViews() {
 		const ok =
 			this.registerBasesView(MEMORIES_VIEW_TYPE, {
-				name: "Memories",
+				name: "Journal Memories",
 				icon: "history",
 				factory: (controller, containerEl) =>
 					new MemoriesBasesView(controller, containerEl, this),
 			}) &&
 			this.registerBasesView(ENTRIES_VIEW_TYPE, {
-				name: "Entries",
+				name: "Journal Entries",
 				icon: "list",
 				factory: (controller, containerEl) =>
 					new EntriesBasesView(controller, containerEl, this),
 			}) &&
 			this.registerBasesView(CALENDAR_VIEW_TYPE, {
-				name: "Calendar",
+				name: "Journal Calendar",
 				icon: "calendar",
 				factory: (controller, containerEl) =>
 					new CalendarBasesView(controller, containerEl, this),
@@ -149,6 +151,46 @@ export default class JournalPlugin extends Plugin {
 		new ConfirmImmichCoordinatesModal(this.app, firstHash, () => {
 			void this.setCoordinatesFromImmich(file);
 		}).open();
+	}
+
+	private extractDate(value: unknown): string | undefined {
+		if (value instanceof Date) {
+			const m = moment(value);
+			return m.isValid() ? m.format("YYYY-MM-DD") : undefined;
+		}
+		if (typeof value === "string") {
+			const match = /^(\d{4}-\d{2}-\d{2})/.exec(value);
+			return match ? match[1] : undefined;
+		}
+		return undefined;
+	}
+
+	private async handleJournalTimeChange(file: TFile, cache: CachedMetadata) {
+		if (!this.isInJournalFolder(file)) return;
+		const date = this.extractDate(cache?.frontmatter?.journalTime);
+		if (!date) return;
+
+		const dateProperty = this.settings.journalDateProperty;
+		const currentDate = this.extractDate(cache?.frontmatter?.[dateProperty]);
+		if (currentDate !== date) {
+			await this.app.fileManager.processFrontMatter(
+				file,
+				(fm: Record<string, unknown>) => {
+					fm[dateProperty] = date;
+				}
+			);
+		}
+
+		const titleMatch = /^\d{4}-\d{2}-\d{2}(.*)$/.exec(file.basename);
+		if (!titleMatch) return;
+		const newBasename = `${date}${titleMatch[1]}`;
+		if (newBasename === file.basename) return;
+		const parentPath =
+			file.parent && file.parent.path !== "/"
+				? `${file.parent.path}/`
+				: "";
+		const newPath = `${parentPath}${newBasename}.${file.extension}`;
+		await this.app.fileManager.renameFile(file, newPath);
 	}
 
 	async setCoordinatesFromImmich(file: TFile) {
