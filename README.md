@@ -1,90 +1,57 @@
-# Obsidian Sample Plugin
+# Journal
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+An opinionated journaling plugin for Obsidian that follows [Journey](https://journey.cloud/)'s approach to journaling: one note per day, with date, location, photos, and a few lines of text per entry.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+The plugin adds three custom [Bases](https://help.obsidian.md/bases) views (Entries, Calendar, Memories), commands for stamping the entry's coordinates from device GPS or from an [Immich](https://immich.app) image, and integrates with the [Obsidian Immich Sync](https://github.com/dragosrotaru/obsidian-immich-sync) plugin to resolve image hashes into rendered thumbnails.
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## Features
 
-## First time developing plugins?
+### Bases views
 
-Quick starting guide for new plugin devs:
+These views require Obsidian's [Bases](https://help.obsidian.md/bases) core plugin to be enabled. They are designed to be used as views on a Base that filters down to your journal entries.
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+- **Entries** — vertical, paginated feed of journal entries sorted by date (newest first). Each card shows the date, the first two non-empty lines of the note, and a thumbnail of the first Immich image.
+- **Calendar** — month grid with one cell per day. Days with an entry are tinted; days that also have an Immich image use the image as the cell background. Includes prev/next month navigation and a "jump to date" modal. The viewed month is persisted per view.
+- **Memories** — horizontal carousel of past anniversaries (30 days ago, 1 year ago, 2 years ago, …) that have an entry on the same calendar day. Tapping a card opens a full-screen, swipeable slideshow of that entry's images.
 
-## Releasing new releases
+### Commands
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+- **Set coordinates from device location** — writes the device's current GPS latitude/longitude into the active note's `coordinates` frontmatter.
+- **Set coordinates from immich images** — looks up the first Immich image listed in the note's `immichImages` frontmatter and writes its EXIF coordinates into `coordinates`.
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+### Automatic coordinate prompt
 
-## Adding your plugin to the community plugin list
+When the first hash in a journal note's `immichImages` frontmatter changes, the plugin prompts you to update the note's coordinates from the new image. This only fires for files inside the configured journal entries folder.
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+## Settings
 
-## How to use
+- **Journal entries folder** — vault-relative folder containing your entries. The Immich-image listener and journal commands only act on files inside this folder. Leave empty to act on all files.
+- **Immich images property** — frontmatter property name holding the list of Immich asset hashes. Default: `immichImages`.
+- **Entry date property** — frontmatter property name holding the entry's date. Default: `journalDate`.
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+## Entry template
 
-## Manually installing the plugin
+`journal-entry-template.md` is a [Templater](https://github.com/SilentVoid13/Templater) template for new entries. It sets up the expected frontmatter (`journalDate`, `journalTime`, `timeZone`, `coordinates`, `sentiment`, `isFavorite`, `immichImages`, tags, css classes), renames the file to the current date, and runs the device-GPS command.
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+## Development
 
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+```bash
+npm install
+npm run dev      # watch build
+npm run build    # production build (typecheck + bundle)
+npm run lint
 ```
 
-If you have multiple URLs, you can also do:
+Built output is bundled to `main.js` at the repo root alongside `manifest.json` and `styles.css`.
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+### Installing locally
 
-## API Documentation
+Symlink or copy `main.js`, `manifest.json`, and `styles.css` into `<Vault>/.obsidian/plugins/obsidian-journal/`, then enable the plugin in **Settings → Community plugins**.
 
-See https://docs.obsidian.md
+## Migration from Journey
+
+The `migration/` directory contains a one-off script that converts a Journey export into Obsidian-compatible Markdown notes, uploading any attached photos to Immich and recording the resulting asset hashes in frontmatter. See `migration/README.md` and `migration/.env.example` for setup.
+
+## License
+
+[0BSD](LICENSE)

@@ -44,11 +44,13 @@ function mapSentiment(json: JourneyJson): number {
 
 type RawExif = {
 	DateTimeOriginal?: string;
+	OffsetTimeOriginal?: string;
+	OffsetTime?: string;
 };
 
 async function findImmichChecksum(filePath: string): Promise<string | null> {
 	const exif = (await exifr.parse(filePath, {
-		pick: ["DateTimeOriginal"],
+		pick: ["DateTimeOriginal", "OffsetTimeOriginal", "OffsetTime"],
 		reviveValues: false,
 	})) as RawExif | undefined;
 
@@ -57,25 +59,32 @@ async function findImmichChecksum(filePath: string): Promise<string | null> {
 		return null;
 	}
 
-	// Treat EXIF local time as UTC. Immich's localDateTime is also
-	// timezone-agnostic, so this naïve interpretation lets us match exactly
-	// on localDateTime without needing real timezone info.
+	const zone = exif.OffsetTimeOriginal ?? exif.OffsetTime;
+	if (!zone) {
+		console.warn(
+			`  no OffsetTimeOriginal in ${path.basename(
+				filePath
+			)} — cannot compute UTC`
+		);
+		return null;
+	}
+
 	const exifTime = DateTime.fromFormat(
 		exif.DateTimeOriginal,
 		"yyyy:LL:dd HH:mm:ss",
-		{ zone: "utc" }
+		{ zone: `UTC${zone}` }
 	);
 	if (!exifTime.isValid) {
 		console.warn(
 			`  invalid DateTimeOriginal in ${path.basename(filePath)}: ${
 				exif.DateTimeOriginal
-			}`
+			} (${zone})`
 		);
 		return null;
 	}
 
-	const takenAfter = exifTime.minus({ minutes: 1 }).toISO();
-	const takenBefore = exifTime.plus({ minutes: 1 }).toISO();
+	const takenAfter = exifTime.minus({ minutes: 1 }).toUTC().toISO();
+	const takenBefore = exifTime.plus({ minutes: 1 }).toUTC().toISO();
 	if (!takenAfter || !takenBefore) return null;
 
 	const result = await searchAssets({
@@ -87,15 +96,8 @@ async function findImmichChecksum(filePath: string): Promise<string | null> {
 		},
 	});
 
-	const exifSeconds = Math.floor(exifTime.toMillis() / 1000);
-	const matches = result.assets.items.filter((asset) => {
-		const local = DateTime.fromISO(asset.localDateTime, { zone: "utc" });
-		return (
-			local.isValid && Math.floor(local.toMillis() / 1000) === exifSeconds
-		);
-	});
-
-	if (matches.length === 0) {
+	const items = result.assets.items;
+	if (items.length === 0) {
 		console.warn(
 			`  no Immich match for ${path.basename(
 				filePath
@@ -103,14 +105,14 @@ async function findImmichChecksum(filePath: string): Promise<string | null> {
 		);
 		return null;
 	}
-	if (matches.length > 1) {
+	if (items.length > 1) {
 		console.warn(
-			`  ${matches.length} Immich matches for ${path.basename(
+			`  ${items.length} Immich matches for ${path.basename(
 				filePath
 			)} @ ${exifTime.toISO()} — using first`
 		);
 	}
-	return matches[0]?.checksum ?? null;
+	return items[0]?.checksum ?? null;
 }
 
 function emitYamlList(items: string[], indent = "    "): string {
