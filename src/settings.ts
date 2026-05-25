@@ -38,11 +38,13 @@ class FolderSuggest extends AbstractInputSuggest<TFolder> {
 
 export interface JournalPluginSettings {
 	immichImagesProperty: string;
+	journalDateProperty: string;
 	journalEntriesFolder: string;
 }
 
 export const DEFAULT_SETTINGS: JournalPluginSettings = {
 	immichImagesProperty: "immichImages",
+	journalDateProperty: "journalDate",
 	journalEntriesFolder: "",
 };
 
@@ -88,6 +90,21 @@ export class JournalSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.immichImagesProperty)
 					.onChange(async (value) => {
 						this.plugin.settings.immichImagesProperty = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Entry date property")
+			.setDesc(
+				"Frontmatter property name that holds the entry's date (e.g. journalDate)."
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder("journalDate")
+					.setValue(this.plugin.settings.journalDateProperty)
+					.onChange(async (value) => {
+						this.plugin.settings.journalDateProperty = value;
 						await this.plugin.saveSettings();
 					})
 			);

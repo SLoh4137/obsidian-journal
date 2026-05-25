@@ -13,17 +13,7 @@ import {
 	JournalSettingTab,
 } from "./settings";
 import { updateCoordinates } from "./frontmatter";
-
-interface LatLng {
-	latitude: number;
-	longitude: number;
-}
-
-interface ImmichPluginApi {
-	getLatLng(hash: string): Promise<LatLng | null>;
-}
-
-const IMMICH_PLUGIN_ID = "obsidian-immich-sync";
+import { IMMICH_PLUGIN_ID, getImmichApi } from "./immich";
 
 export default class JournalPlugin extends Plugin {
 	settings: JournalPluginSettings;
@@ -133,14 +123,8 @@ export default class JournalPlugin extends Plugin {
 			new Notice(`No "${property}" frontmatter found`);
 			return;
 		}
-		const immich = (
-			this.app as unknown as {
-				plugins?: {
-					plugins?: Record<string, { api?: ImmichPluginApi }>;
-				};
-			}
-		).plugins?.plugins?.[IMMICH_PLUGIN_ID];
-		if (!immich?.api?.getLatLng) {
+		const immich = getImmichApi(this.app);
+		if (!immich?.getLatLng) {
 			new Notice(
 				`Plugin "${IMMICH_PLUGIN_ID}" not found or its API is unavailable`
 			);
@@ -148,7 +132,7 @@ export default class JournalPlugin extends Plugin {
 		}
 		for (const hash of images) {
 			if (typeof hash !== "string") continue;
-			const latLng = await immich.api.getLatLng(hash);
+			const latLng = await immich.getLatLng(hash);
 			if (latLng) {
 				await updateCoordinates(
 					this.app,
