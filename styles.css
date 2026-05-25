@@ -1,6 +1,72 @@
 /* Journal Bases views */
 
 .journal-entries-view {
+	padding: 12px;
+	overflow-y: auto;
+	height: 100%;
+}
+
+.journal-entries-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.journal-entries-sentinel {
+	height: 1px;
+}
+
+.journal-entry-card {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	padding: 12px 14px;
+	background: var(--background-secondary);
+	cursor: pointer;
+	transition: background-color 120ms ease;
+}
+
+.journal-entry-card:hover {
+	background: var(--background-modifier-hover);
+}
+
+.journal-entry-card-header {
+	font-weight: 600;
+	margin-bottom: 8px;
+	color: var(--text-normal);
+}
+
+.journal-entry-card-body {
+	display: flex;
+	gap: 12px;
+	align-items: stretch;
+}
+
+.journal-entry-card-text {
+	flex: 3;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	color: var(--text-muted);
+}
+
+.journal-entry-card-body.no-image .journal-entry-card-text {
+	flex: 1;
+}
+
+.journal-entry-card-line {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.journal-entry-card-thumb {
+	flex: 1;
+	aspect-ratio: 1 / 1;
+	border-radius: 8px;
+	background-size: cover;
+	background-position: center;
+	background-color: var(--background-modifier-border);
 }
 
 .journal-calendar-view {
