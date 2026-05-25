@@ -14,6 +14,9 @@ import {
 } from "./settings";
 import { updateCoordinates } from "./frontmatter";
 import { IMMICH_PLUGIN_ID, getImmichApi } from "./immich";
+import { ENTRIES_VIEW_TYPE, EntriesBasesView } from "./views/entries";
+import { CALENDAR_VIEW_TYPE, CalendarBasesView } from "./views/calendar";
+import { MEMORIES_VIEW_TYPE, MemoriesBasesView } from "./views/memories";
 
 export default class JournalPlugin extends Plugin {
 	settings: JournalPluginSettings;
@@ -77,7 +80,36 @@ export default class JournalPlugin extends Plugin {
 			})
 		);
 
+		this.registerJournalBasesViews();
+
 		this.addSettingTab(new JournalSettingTab(this.app, this));
+	}
+
+	private registerJournalBasesViews() {
+		const ok =
+			this.registerBasesView(MEMORIES_VIEW_TYPE, {
+				name: "Memories",
+				icon: "history",
+				factory: (controller, containerEl) =>
+					new MemoriesBasesView(controller, containerEl, this),
+			}) &&
+			this.registerBasesView(ENTRIES_VIEW_TYPE, {
+				name: "Entries",
+				icon: "list",
+				factory: (controller, containerEl) =>
+					new EntriesBasesView(controller, containerEl, this),
+			}) &&
+			this.registerBasesView(CALENDAR_VIEW_TYPE, {
+				name: "Calendar",
+				icon: "calendar",
+				factory: (controller, containerEl) =>
+					new CalendarBasesView(controller, containerEl, this),
+			});
+		if (!ok) {
+			console.warn(
+				"Bases is not enabled in this vault; journal views are unavailable"
+			);
+		}
 	}
 
 	private firstImmichHash(
