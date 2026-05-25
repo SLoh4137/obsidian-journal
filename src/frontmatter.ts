@@ -6,7 +6,7 @@ export async function updateCoordinates(
 	latitude: number,
 	longitude: number
 ): Promise<void> {
-	await app.fileManager.processFrontMatter(file, (fm) => {
+	await app.fileManager.processFrontMatter(file, (fm: Record<string, unknown>) => {
 		fm.coordinates = `${latitude}, ${longitude}`;
 	});
 }

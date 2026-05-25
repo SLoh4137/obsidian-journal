@@ -12,7 +12,15 @@ export interface ImmichApi {
 
 export const IMMICH_PLUGIN_ID = "obsidian-immich-sync";
 
+interface AppWithPlugins {
+	plugins: {
+		getPlugin(id: string): { api?: ImmichApi } | null;
+	};
+}
+
 export function getImmichApi(app: App): ImmichApi | null {
-	// @ts-ignore
-	return app?.plugins.getPlugin(IMMICH_PLUGIN_ID)?.api;
+	const plugin = (app as unknown as AppWithPlugins).plugins.getPlugin(
+		IMMICH_PLUGIN_ID
+	);
+	return plugin?.api ?? null;
 }

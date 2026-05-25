@@ -27,7 +27,7 @@ export default class JournalPlugin extends Plugin {
 
 		this.addCommand({
 			id: "set-coordinates-from-device-gps",
-			name: "Set coordinates from device GPS",
+			name: "Set coordinates from device location",
 			checkCallback: (checking: boolean) => {
 				const file =
 					this.app.workspace.getActiveViewOfType(MarkdownView)?.file;
@@ -40,14 +40,18 @@ export default class JournalPlugin extends Plugin {
 						return;
 					}
 					navigator.geolocation.getCurrentPosition(
-						async (pos) => {
-							await updateCoordinates(
-								this.app,
-								file,
-								pos.coords.latitude,
-								pos.coords.longitude
-							);
-							new Notice("Coordinates updated from device GPS");
+						(pos) => {
+							void (async () => {
+								await updateCoordinates(
+									this.app,
+									file,
+									pos.coords.latitude,
+									pos.coords.longitude
+								);
+								new Notice(
+									"Coordinates updated from device location"
+								);
+							})();
 						},
 						(err) => {
 							new Notice(

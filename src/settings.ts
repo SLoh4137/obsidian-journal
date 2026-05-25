@@ -73,16 +73,16 @@ export class JournalSettingTab extends PluginSettingTab {
 						this.plugin.settings.journalEntriesFolder = value;
 						await this.plugin.saveSettings();
 					});
-				new FolderSuggest(this.app, text.inputEl, async (value) => {
+				new FolderSuggest(this.app, text.inputEl, (value) => {
 					this.plugin.settings.journalEntriesFolder = value;
-					await this.plugin.saveSettings();
+					void this.plugin.saveSettings();
 				});
 			});
 
 		new Setting(containerEl)
 			.setName("Immich images property")
 			.setDesc(
-				"Frontmatter property name that holds the list of Immich asset hashes to look up coordinates for."
+				"Frontmatter property name holding the list of image asset hashes to look up coordinates for."
 			)
 			.addText((text) =>
 				text
@@ -97,7 +97,7 @@ export class JournalSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Entry date property")
 			.setDesc(
-				"Frontmatter property name that holds the entry's date (e.g. journalDate)."
+				"Frontmatter property name that holds the entry's date."
 			)
 			.addText((text) =>
 				text

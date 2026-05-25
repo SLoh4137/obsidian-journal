@@ -22,6 +22,16 @@ export default tseslint.config(
 		},
 	},
 	...obsidianmd.configs.recommended,
+	{
+		files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+		plugins: { obsidianmd },
+		rules: {
+			"obsidianmd/ui/sentence-case": ["error", {
+				enforceCamelCaseLower: true,
+				ignoreRegex: ["^(immichImages|journalDate)$"],
+			}],
+		},
+	},
 	globalIgnores([
 		"node_modules",
 		"dist",
@@ -30,5 +40,6 @@ export default tseslint.config(
 		"version-bump.mjs",
 		"versions.json",
 		"main.js",
+		"migration",
 	]),
 );
