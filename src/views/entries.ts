@@ -3,9 +3,9 @@ import type JournalPlugin from "../main";
 import { getImmichApi } from "../immich";
 import {
 	firstImmichHash,
-	getBodyLines,
 	openEntry,
 	parseEntryDate,
+	renderEntryTextBlock,
 } from "./shared";
 
 export const ENTRIES_VIEW_TYPE = "journal-entries";
@@ -84,7 +84,11 @@ export class EntriesBasesView extends BasesView {
 	}
 
 	private renderCard(entry: BasesEntry, parent: HTMLElement) {
-		const { journalDateProperty, immichImagesProperty } = this.plugin.settings;
+		const {
+			journalDateProperty,
+			immichImagesProperty,
+			journalPrefixProperty,
+		} = this.plugin.settings;
 		const date = parseEntryDate(this.app, entry, journalDateProperty);
 		const hash = firstImmichHash(this.app, entry, immichImagesProperty);
 
@@ -104,12 +108,14 @@ export class EntriesBasesView extends BasesView {
 		if (!hash) body.addClass("no-image");
 
 		const textEl = body.createDiv({ cls: "journal-entry-card-text" });
-		void getBodyLines(this.app, entry.file, 2).then((lines) => {
-			textEl.empty();
-			for (const line of lines) {
-				textEl.createDiv({ cls: "journal-entry-card-line", text: line });
-			}
-		});
+		void renderEntryTextBlock(
+			this.app,
+			textEl,
+			entry.file,
+			journalPrefixProperty,
+			4,
+			this
+		);
 
 		if (hash) {
 			const thumb = body.createDiv({ cls: "journal-entry-card-thumb" });

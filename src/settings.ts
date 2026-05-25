@@ -40,12 +40,14 @@ export interface JournalPluginSettings {
 	immichImagesProperty: string;
 	journalDateProperty: string;
 	journalEntriesFolder: string;
+	journalPrefixProperty: string;
 }
 
 export const DEFAULT_SETTINGS: JournalPluginSettings = {
 	immichImagesProperty: "immichImages",
 	journalDateProperty: "journalDate",
 	journalEntriesFolder: "",
+	journalPrefixProperty: "Journal ",
 };
 
 export class JournalSettingTab extends PluginSettingTab {
@@ -96,15 +98,28 @@ export class JournalSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Entry date property")
-			.setDesc(
-				"Frontmatter property name that holds the entry's date."
-			)
+			.setDesc("Frontmatter property name that holds the entry's date.")
 			.addText((text) =>
 				text
 					.setPlaceholder("journalDate")
 					.setValue(this.plugin.settings.journalDateProperty)
 					.onChange(async (value) => {
 						this.plugin.settings.journalDateProperty = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Journal entry prefix")
+			.setDesc(
+				"String prefix at the beginning of a journal entry file name. Will be ignored when replacing the date."
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder("")
+					.setValue(this.plugin.settings.journalPrefixProperty)
+					.onChange(async (value) => {
+						this.plugin.settings.journalPrefixProperty = value;
 						await this.plugin.saveSettings();
 					})
 			);

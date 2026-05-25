@@ -2,6 +2,7 @@ import {
 	App,
 	BasesEntry,
 	BasesView,
+	Component,
 	Modal,
 	QueryController,
 	moment,
@@ -10,9 +11,9 @@ import type JournalPlugin from "../main";
 import { ImmichApi, getImmichApi } from "../immich";
 import {
 	allImmichHashes,
-	getBodyLines,
 	openEntry,
 	parseEntryDate,
+	renderEntryTextBlock,
 } from "./shared";
 
 export const MEMORIES_VIEW_TYPE = "journal-memories";
@@ -137,6 +138,7 @@ class MemoriesModal extends Modal {
 	private slides: Slide[] = [];
 	private index = 0;
 	private stageEl!: HTMLElement;
+	private slideComponent = new Component();
 
 	constructor(
 		app: App,
@@ -183,10 +185,14 @@ class MemoriesModal extends Modal {
 	}
 
 	onClose() {
+		this.slideComponent.unload();
 		this.contentEl.empty();
 	}
 
 	private renderSlide() {
+		this.slideComponent.unload();
+		this.slideComponent = new Component();
+		this.slideComponent.load();
 		this.stageEl.empty();
 		const slide = this.slides[this.index];
 		if (!slide) {
@@ -202,6 +208,8 @@ class MemoriesModal extends Modal {
 		const media = this.stageEl.createDiv({ cls: "journal-memories-media" });
 		this.attachGestures(media);
 
+		const prefix = this.plugin.settings.journalPrefixProperty;
+
 		if (slide.hash) {
 			const img = media.createEl("img", { cls: "journal-memories-img" });
 			const api = getImmichApi(this.app);
@@ -211,12 +219,14 @@ class MemoriesModal extends Modal {
 		} else {
 			media.addClass("text-only");
 			const text = media.createDiv({ cls: "journal-memories-text-slide" });
-			void getBodyLines(this.app, slide.period.entry.file, 4).then((lines) => {
-				text.empty();
-				for (const line of lines) {
-					text.createDiv({ text: line });
-				}
-			});
+			void renderEntryTextBlock(
+				this.app,
+				text,
+				slide.period.entry.file,
+				prefix,
+				4,
+				this.slideComponent
+			);
 		}
 
 		const openPanel = this.stageEl.createDiv({
@@ -230,12 +240,14 @@ class MemoriesModal extends Modal {
 		});
 
 		const lines = openPanel.createDiv({ cls: "journal-memories-open-lines" });
-		void getBodyLines(this.app, slide.period.entry.file, 4).then((bodyLines) => {
-			lines.empty();
-			for (const line of bodyLines) {
-				lines.createDiv({ text: line });
-			}
-		});
+		void renderEntryTextBlock(
+			this.app,
+			lines,
+			slide.period.entry.file,
+			prefix,
+			4,
+			this.slideComponent
+		);
 		openPanel.createDiv({
 			cls: "journal-memories-open-cta",
 			text: "Open note ›",
