@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-journal",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "Opionated journaling plugin for Obsidian that follows Journey's approach to journaling.",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {
